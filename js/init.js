@@ -3,7 +3,7 @@
 const BASE_URL = "https://api.jolpi.ca";
 let CURRENT_ROUND = "";
 let CURRENT_SEASON = "2024";
-
+let SEASON_CACHE = {};
 const COUNTRY={
     "British" : "gb",
     "Austrian": "at",
@@ -25,6 +25,28 @@ const COUNTRY={
     "New Zealander":"nz",
     "Chinese": "cn",
     "Finnish": "fi",
+    "USA": "US",
+    "Singapore": "SG",
+    "Azerbaijan": "AZ",
+    "Italy": "IT",
+    "Netherlands": "NL",
+    "Belgium": "BE",
+    "Hungary": "HU",
+    "UK": "GB",
+    "Austria": "AT",
+    "Spain": "ES",
+    "Canada": "CA",
+    "Monaco": "MC",
+    "China": "CN",
+    "Japan": "JP",
+    "Australia": "AU",
+    "Saudi Arabia": "SA",
+    "Bahrain": "BH",
+    "Mexico": "MX",
+    "Brazil": "BR",
+    "United States": "US",
+    "Qatar": "QA",
+    "UAE": "AE",
 };
 document.addEventListener("DOMContentLoaded",()=>{
 
@@ -40,8 +62,12 @@ function hideSpinner(){
 }
 //
 function getFlag(country){
+    if(COUNTRY[country] == undefined){
+        console.log("no flag:",country);
+    }else{
     let code = COUNTRY[country].toUpperCase();
     return `https://flagsapi.com/${code}/flat/64.png`;
+    }
 }
 
 let getJsonData = async function (url){
@@ -94,29 +120,38 @@ async function constructorStandings(year = new Date().getFullYear()){
 }
 
 //Resultados de carrera
-async function driverResult( season, round){
-    let RACE_RESULT = `/ergast/f1/${season}/${round}/results/`;
-    let json = await getJsonData(BASE_URL+RACE_RESULT);
-    return json.data.MRData.RaceTable.Races[0];
+async function seasonResult(season){
+    console.log("seasonResult:", season);
+    let result = [];
+    let end = false;
+    let round = 1;
 
-    /*
-    let results = {}
-    //recorro cada carrera de la temporada
-    for(i=CURRENT_ROUND ; i>18 ; i--){
-        let raceResult = {};
-        let DRIVER_RESULT = `/ergast/f1/${CURRENT_SEASON}/${i}/results/`;
-        let json = await getJsonData(BASE_URL+DRIVER_RESULT);
-        let data = json.data.MRData.RaceTable.Races[0];
-        
-        raceResult.round = data.round;
-        raceResult.raceName = data.raceName;
-        raceResult.date = data.date;
+    if(SEASON_CACHE[season] == undefined){
+        while(!end){
+            let RACE_RESULT = `/ergast/f1/${season}/${round}/results/`;
+            let json = await getJsonData(BASE_URL+RACE_RESULT);
 
-        let driverStats = data.Results.filter( pos => pos.Driver.driverId == driverId);
-        console.log("Busque", driverId, driverStats);
+            if(json.data.MRData.total != "0"){
+                result.push(json.data.MRData.RaceTable.Races[0]);
+                round ++;
+            }else{
+                //no hay resultados en la query
+                end = true;
+            }
+        }
+        //guardo en cache
+        SEASON_CACHE[season] = result;
+        return result;
+    }else{
+        //Tengo en caché la tabla.
+        console.log("seasonResult: return cache");
+        return SEASON_CACHE[season];
+    }
+}
 
-        console.log(data);
-        */
-
-    
+//Calendario
+async function getCalendar(){
+    console.log("getCalendar:")
+    let json = await getJsonData(BASE_URL+`/ergast/f1/current/`);
+    return json.data.MRData.RaceTable.Races
 }
