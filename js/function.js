@@ -30,7 +30,7 @@ function tablaPilotos(data){
     data.DriverStandings.forEach(driver => {
         let flag = getFlag(driver.Driver.nationality);
         content = 
-        `<li class="list-group-item d-flex justify-content-between align-items-start">
+        `<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" onclick=driver("${driver.Driver.driverId}")>
             <div class="ms-2 me-auto">
                 <div class="fw-bold">
                     ${driver.Driver.familyName}
@@ -38,9 +38,10 @@ function tablaPilotos(data){
                 ${driver.Constructors[0].name}
             </div>
             <div class="me-2">
+                #${driver.Driver.permanentNumber}
                 <img src="${flag}" class="nation">
             </div>
-            <div class="d-flex flex-column">
+            <div class="d-flex flex-column col-2">
             <span class="badge text-bg-primary rounded-pill mb-1">Puntos: ${driver.points}</span>`;
             if(driver.wins > 0){
                 content += `<span class="badge text-bg-success rounded-pill">Victorias: ${driver.wins}</span>`;
@@ -64,9 +65,21 @@ function tablaConstructors(data){
                 <div class="fw-bold">${team.Constructor.name}</div>
                 ${team.Constructor.nationality}
                 </div>
-                <span class="badge text-bg-primary rounded-pill">${team.points}</span>
+                <div class="d-flex flex-column col-2">
+                <span class="badge text-bg-primary rounded-pill">Puntos: ${team.points}</span>
+                </div>
         </li>`;
     hideSpinner();
     pageContent.insertAdjacentHTML('beforeend', content);
     });
+}
+
+//Resultados del piloto en la temporada.
+function driver(driverId){
+    console.log("driver",driverId, CURRENT_SEASON, CURRENT_ROUND);
+    for(i=CURRENT_ROUND ; i>18 ; i--){
+        //recupero info
+        driverResult(driverId);
+
+    }
 }

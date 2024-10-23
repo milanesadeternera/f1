@@ -1,6 +1,9 @@
 /*https://github.com/jolpica/jolpica-f1/blob/main/docs/README.md
 */
 const BASE_URL = "https://api.jolpi.ca";
+let CURRENT_ROUND = "";
+let CURRENT_SEASON = "2024";
+
 const COUNTRY={
     "British" : "gb",
     "Austrian": "at",
@@ -38,8 +41,6 @@ function hideSpinner(){
 //
 function getFlag(country){
     let code = COUNTRY[country].toUpperCase();
-    console.log(country, code)
-
     return `https://flagsapi.com/${code}/flat/64.png`;
 }
 
@@ -75,6 +76,8 @@ async function driveStandings(year = new Date().getFullYear()){
         console.log("error")
     }
     let table = data.data.MRData.StandingsTable.StandingsLists[0];
+    CURRENT_ROUND=data.data.MRData.StandingsTable.round;
+    CURRENT_SEASON=data.data.MRData.StandingsTable.season;
     return table;
 }
 //Constructor Standings
@@ -88,4 +91,32 @@ async function constructorStandings(year = new Date().getFullYear()){
     }
     let table = data.data.MRData.StandingsTable.StandingsLists[0];
     return table;
+}
+
+//Resultados de carrera
+async function driverResult( season, round){
+    let RACE_RESULT = `/ergast/f1/${season}/${round}/results/`;
+    let json = await getJsonData(BASE_URL+RACE_RESULT);
+    return json.data.MRData.RaceTable.Races[0];
+
+    /*
+    let results = {}
+    //recorro cada carrera de la temporada
+    for(i=CURRENT_ROUND ; i>18 ; i--){
+        let raceResult = {};
+        let DRIVER_RESULT = `/ergast/f1/${CURRENT_SEASON}/${i}/results/`;
+        let json = await getJsonData(BASE_URL+DRIVER_RESULT);
+        let data = json.data.MRData.RaceTable.Races[0];
+        
+        raceResult.round = data.round;
+        raceResult.raceName = data.raceName;
+        raceResult.date = data.date;
+
+        let driverStats = data.Results.filter( pos => pos.Driver.driverId == driverId);
+        console.log("Busque", driverId, driverStats);
+
+        console.log(data);
+        */
+
+    
 }
