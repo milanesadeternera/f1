@@ -155,3 +155,10 @@ async function getCalendar(){
     let json = await getJsonData(BASE_URL+`/ergast/f1/current/`);
     return json.data.MRData.RaceTable.Races
 }
+
+//info piloto
+async function getDriver(season, driverId){
+    console.log("getDriver():", season, driverId)
+    let json = await getJsonData(BASE_URL+`/ergast/f1/${season}/drivers/${driverId}/`);
+    return json.data.MRData.DriverTable.Drivers[0];
+}

@@ -1,35 +1,4 @@
-let pageContent="";
 
-document.addEventListener("DOMContentLoaded",async()=>{
-    //Tabla de cuerpo.
-    pageContent = document.getElementById("mainTable");
-    //cargo por defecto la tabla de pilotos
-    data = await driveStandings()
-    tablaPilotos(data);
-})
-
-
-//Evento de cambio de pestaña.
-document.getElementById('nav-tab').addEventListener('shown.bs.tab', async function (event){
-    //Muestro spinner y borro contenido
-    showSpinner();
-    document.getElementById("mainTable").innerHTML="";
-    let data = "";
-    switch(event.target.id){
-        case "nav-pilotos-tab":
-            data = await driveStandings()
-            tablaPilotos(data);
-        break;
-        case "nav-constructores-tab":
-            data = await constructorStandings()
-            tablaConstructors(data);
-        break;
-        case "nav-calendar-tab":
-            data = await getCalendar()
-            tablaCalendar(data);
-        break;
-    }
-  });
 
 //tabla pilotos
 function tablaPilotos(data){
@@ -44,7 +13,7 @@ function tablaPilotos(data){
     data.DriverStandings.forEach(driver => {
         let flag = getFlag(driver.Driver.nationality);
         content = 
-        `<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" onclick=driver("${driver.Driver.driverId}")>
+        `<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-start pointer" onclick=driver("${driver.Driver.driverId}")>
             <div class="ms-2 me-auto">
                 <div class="fw-bold">
                     ${driver.Driver.familyName}
@@ -96,10 +65,40 @@ function tablaConstructors(data){
 
 //Resultados del piloto en la temporada.
 async function driver(driverId){
-    console.log("driver",driverId, CURRENT_SEASON, CURRENT_ROUND);
+    console.log("driver():",driverId, CURRENT_SEASON, CURRENT_ROUND);
     //borro tabla y muestro spinner
     pageContent.innerHTML="";
     showSpinner();
+
+    //creo cabecera
+    let ulHeadElement = document.createElement('ul');
+    ulHeadElement.setAttribute('class', 'list-group mb-3');
+    ulHeadElement.setAttribute('data-bs-theme', 'dark');
+    pageContent.appendChild(ulHeadElement);
+
+    let driver = await getDriver(CURRENT_SEASON, driverId);
+    let season = await seasonResult(CURRENT_SEASON);
+
+    console.log("driver", driver);
+    let flag = getFlag(driver.nationality);
+    let headContent = `
+        <div class="me-auto">
+        <button type="button" class="btn" onclick=changeTab("nav-pilotos-tab")><img src="data/arrow-left.svg"> volver</button>
+        </div>
+        <li class="list-group-item">
+            <div class="d-flex  mx-2">
+                <p class="fw-bold my-auto fs-4 align-middle">${driver.givenName} ${driver.familyName}</p>
+                <p class="fw-lignt ms-2 my-auto"> #${driver.permanentNumber}</p>
+            </div>
+            <div class="d-flex">
+                <img src="${flag}" class="nation ms-2">
+                <p class="fw-bold mx-2 my-auto align-middle">${driver.nationality}</p>
+                <p class="fw-light my-auto align-middle"></p>
+            </div>
+        </li>
+    `;
+
+    ulHeadElement.insertAdjacentHTML('afterbegin', headContent);
 
     //creo tabla ul
     let ulElement = document.createElement('ul');
@@ -107,7 +106,6 @@ async function driver(driverId){
     ulElement.setAttribute('data-bs-theme', 'dark');
     pageContent.appendChild(ulElement);
 
-    let season = await seasonResult(CURRENT_SEASON);
     season.forEach( round => {
         let driverStats = round.Results.filter(result => result.Driver.driverId == driverId)[0];
         //Si tengo undefined, el piloto no corrió
@@ -173,6 +171,7 @@ async function driver(driverId){
     hideSpinner();
 }
 
+//Tabla calendario
 async function tablaCalendar(data){
     console.log("tablaCalendar:",data);
     //borro tabla y muestro spinner
@@ -188,17 +187,18 @@ async function tablaCalendar(data){
     data.forEach(round => {
         let flag = getFlag(round.Circuit.Location.country);
         content = 
-            `<li class="list-group-item justify-content-between align-items-start">
+            `<li class="list-group-item list-group-item-action justify-content-between align-items-start pointer" onclick="roundResult(${round.round})">
                 <div class="ms-2 me-auto">
                     <div class="d-flex align-items-center">
                         <p class="my-auto">#${round.round}</p>
                         <img src="${flag}" class="nation ms-2">
                         <p class="fw-bold mx-2 my-auto fs-4 align-middle">${round.raceName}</p>
                         <p class="fw-light my-auto align-middle">${round.Circuit.circuitName}</p>
-                    `;
-            if(round.round <= parseInt(CURRENT_ROUND)){
-                content +=`<button type="button" class="btn btn-secondary ms-auto" onclick="roundResult(${round.round})">Resultados</button>`;
-            }
+                    </div>
+                </div>
+                <div class="d-flex">
+                    <!--<p>${round.Circuit.circuitName}</p>-->`;
+            //Proxima Fecha
             if(round.round == parseInt(CURRENT_ROUND)+1){
                 content +=`
                             <span class="badge text-bg-success ms-auto">
@@ -210,9 +210,6 @@ async function tablaCalendar(data){
 
         content +=`
                     </div>
-                    <div>
-                        <p>${round.Circuit.circuitName}</p>
-                    </div>
                 </div>
             </li>`;
         ulElement.insertAdjacentHTML('beforeend', content);   
@@ -220,11 +217,48 @@ async function tablaCalendar(data){
     hideSpinner();
 }
 
+//Tabla resultado de una ronda
 async function roundResult(roundId){
     console.log("roundId:", roundId);
+
+    //Recupero datos.
+    let season = await seasonResult(CURRENT_SEASON);
+    let round = season.filter( race => parseInt(race.round) == roundId)[0];
+
+    //No se corrio la carrera
+    if(round == undefined){
+        console.log("roundResult: no encontre la carrera");
+        return false;
+    }
+
+    console.log("roundId:",round);
     //borro tabla y muestro spinner
     pageContent.innerHTML="";
     showSpinner();
+
+    //creo cabecera
+    let ulHeadElement = document.createElement('ul');
+    ulHeadElement.setAttribute('class', 'list-group mb-3');
+    ulHeadElement.setAttribute('data-bs-theme', 'dark');
+    pageContent.appendChild(ulHeadElement);
+    let flag = getFlag(round.Circuit.Location.country);
+    let headContent = `
+        <div class="me-auto">
+        <button type="button" class="btn" onclick=changeTab("nav-calendar-tab")><img src="data/arrow-left.svg"> volver</button>
+        </div>
+        <li class="list-group-item">
+            <div>
+                <p class="my-auto">Round: ${round.round}</p>
+            </div>
+            <div class="d-flex">
+                <img src="${flag}" class="nation ms-2">
+                <p class="fw-bold mx-2 my-auto fs-4 align-middle">${round.raceName}</p>
+                <p class="fw-light my-auto align-middle">${round.Circuit.circuitName}</p>
+            </div>
+        </li>
+    `;
+
+    ulHeadElement.insertAdjacentHTML('afterbegin', headContent);
 
     //creo tabla ul
     let ulElement = document.createElement('ul');
@@ -232,21 +266,47 @@ async function roundResult(roundId){
     ulElement.setAttribute('data-bs-theme', 'dark');
     pageContent.appendChild(ulElement);
 
-    let season = await seasonResult(CURRENT_SEASON);
-    let race = season.filter( round => parseInt(round.round) == roundId)[0];
-    console.log(race);
+    content =`<li class="list-group-item">
+                <table class="table">
+                <thead>
+                    <tr>
+                    <th scope="col">Pos.</th>
+                    <th scope="col">Piloto</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">Tiempo</th>
+                    <th scope="col" class="text-end">Puntos</th>
+                    </tr>
+                </thead>
+                <tbody>`;
 
-    //Ficha superior
-    content =`
-        <li class="list-group-item justify-content-between align-items-start">
-                <div class="ms-2 me-auto">
-                    <div class="d-flex align-items-center">
-                        <p class="my-auto">#</p>
-                        <img src="" class="nation ms-2">
-                    </div>
-                </div>
-        </li>
-    `;
-    ulElement.insertAdjacentHTML('start', content);
+    round.Results.forEach( result => {
+        //Lista Resultados
+        content +=`
+                    <tr>
+                        <th scope="row">${result.position}</th>
+                        <td>${result.Driver.familyName}</td>
+                        <td>${result.Constructor.name}</td>`;
+
+                        //DNF
+                        if(/^[a-zA-Z]$/.test(result.positionText)){
+                            content += `<td><span class="badge text-bg-danger rounded-pill">DNF</span></td>`;
+                        }else{
+                            content += `<td>${result.Time?.time ?? result.status}</td>`
+                        }
+                        //Fast Lap
+                        if((result.FastestLap?.rank ?? "0") == "1"){
+                            content +=`<td class="text-end">
+                                    <span class="badge fastlap rounded-pill me-2">Fast Lap</span>
+                                    ${result.points}
+                                    </td>`;
+                        }else{
+                            content +=`<td class="text-end">${result.points}</td>`;
+                        }
+                        
+                    content +=`</tr>`;
+    })
+    content +=`</tbody></table></li>`;
+    ulElement.insertAdjacentHTML('beforeend', content);
     hideSpinner()
 }
+
