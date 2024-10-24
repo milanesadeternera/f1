@@ -108,7 +108,7 @@ async function driver(driverId){
     pageContent.appendChild(ulElement);
 
     let season = await seasonResult(CURRENT_SEASON);
-    season.reverse().forEach( round => {
+    season.forEach( round => {
         let driverStats = round.Results.filter(result => result.Driver.driverId == driverId)[0];
         //Si tengo undefined, el piloto no corrió
         if(driverStats != undefined){
@@ -196,8 +196,16 @@ async function tablaCalendar(data){
                         <p class="fw-bold mx-2 my-auto fs-4 align-middle">${round.raceName}</p>
                         <p class="fw-light my-auto align-middle">${round.Circuit.circuitName}</p>
                     `;
+            if(round.round <= parseInt(CURRENT_ROUND)){
+                content +=`<button type="button" class="btn btn-secondary ms-auto" onclick="roundResult(${round.round})">Resultados</button>`;
+            }
             if(round.round == parseInt(CURRENT_ROUND)+1){
-                content +=`<span class="badge text-bg-success ms-auto">Proxima</span>`;
+                content +=`
+                            <span class="badge text-bg-success ms-auto">
+                                <p class="fs-6 my-1" >Proxima
+                                <img src="data/calendar-check.svg" ></p>
+                            </span>
+                        `;
             }
 
         content +=`
@@ -210,4 +218,35 @@ async function tablaCalendar(data){
         ulElement.insertAdjacentHTML('beforeend', content);   
     })
     hideSpinner();
+}
+
+async function roundResult(roundId){
+    console.log("roundId:", roundId);
+    //borro tabla y muestro spinner
+    pageContent.innerHTML="";
+    showSpinner();
+
+    //creo tabla ul
+    let ulElement = document.createElement('ul');
+    ulElement.setAttribute('class', 'list-group');
+    ulElement.setAttribute('data-bs-theme', 'dark');
+    pageContent.appendChild(ulElement);
+
+    let season = await seasonResult(CURRENT_SEASON);
+    let race = season.filter( round => parseInt(round.round) == roundId)[0];
+    console.log(race);
+
+    //Ficha superior
+    content =`
+        <li class="list-group-item justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="d-flex align-items-center">
+                        <p class="my-auto">#</p>
+                        <img src="" class="nation ms-2">
+                    </div>
+                </div>
+        </li>
+    `;
+    ulElement.insertAdjacentHTML('start', content);
+    hideSpinner()
 }

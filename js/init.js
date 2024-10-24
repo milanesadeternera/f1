@@ -140,8 +140,8 @@ async function seasonResult(season){
             }
         }
         //guardo en cache
-        SEASON_CACHE[season] = result;
-        return result;
+        SEASON_CACHE[season] = result.reverse();
+        return SEASON_CACHE[season];
     }else{
         //Tengo en caché la tabla.
         console.log("seasonResult: return cache");
