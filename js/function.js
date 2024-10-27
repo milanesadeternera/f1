@@ -1,19 +1,22 @@
+/*
+Estas funciones SOLO crean el contenido a mostrar en la página.
+El manejo del contenido se hace en controller.js
+*/
 
 
 //tabla pilotos
-function tablaPilotos(data){
-    console.log("tablaPilotos",data);
+function driverStandingsContent(data){
+    console.log("driverStandingsContent",data);
     //creo tabla ol
     let olElement = document.createElement('ol');
     olElement.setAttribute('class', 'list-group list-group-numbered');
     olElement.setAttribute('data-bs-theme', 'dark');
-    pageContent.appendChild(olElement);
 
     //agrego elementos
     data.DriverStandings.forEach(driver => {
         let flag = getFlag(driver.Driver.nationality);
         content = 
-        `<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-start pointer" onclick=driver("${driver.Driver.driverId}")>
+        `<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-start pointer" onclick=driverDetailController("${driver.Driver.driverId}")>
             <div class="ms-2 me-auto">
                 <div class="fw-bold">
                     ${driver.Driver.familyName}
@@ -21,7 +24,7 @@ function tablaPilotos(data){
                 ${driver.Constructors[0].name}
             </div>
             <div class="me-2">
-                #${driver.Driver.permanentNumber}
+                ${driver.Driver.permanentNumber ?? ""}
                 <img src="${flag}" class="nation">
             </div>
             <div class="d-flex flex-column col-2">
@@ -35,16 +38,16 @@ function tablaPilotos(data){
         hideSpinner();
         olElement.insertAdjacentHTML('beforeend', content);
     });
+    return olElement;
 }
 
 //tabla constructores
-function tablaConstructors(data){
-    console.log("tablaConstructor",data);
+function constructorStandingsContent(data){
+    console.log("constructorStandingsContent():",data);
     //creo tabla ol
     let olElement = document.createElement('ol');
     olElement.setAttribute('class', 'list-group list-group-numbered');
     olElement.setAttribute('data-bs-theme', 'dark');
-    pageContent.appendChild(olElement);
 
     //agrego elementos
     data.ConstructorStandings.forEach(team => {
@@ -55,31 +58,30 @@ function tablaConstructors(data){
                 ${team.Constructor.nationality}
                 </div>
                 <div class="d-flex flex-column col-2">
-                <span class="badge text-bg-primary rounded-pill">Puntos: ${team.points}</span>
+                <span class="badge text-bg-primary rounded-pill mb-1">Puntos: ${team.points}</span>
+                <span class="badge text-bg-success rounded-pill">Victorias: ${team.wins}</span>
                 </div>
         </li>`;
         hideSpinner();
         olElement.insertAdjacentHTML('beforeend', content);
     });
+    return olElement;
 }
 
 //Resultados del piloto en la temporada.
-async function driver(driverId){
-    console.log("driver():",driverId, CURRENT_SEASON, CURRENT_ROUND);
-    //borro tabla y muestro spinner
-    pageContent.innerHTML="";
-    showSpinner();
+async function driverDetailContent(season, driver){
+    console.log("driverDetailContent():",season, driver, ROUND);
+    //Creo div que contiente respuesta entera.
+    let div = document.createElement('div');
+
+    let driverId = driver.driverId;
 
     //creo cabecera
     let ulHeadElement = document.createElement('ul');
     ulHeadElement.setAttribute('class', 'list-group mb-3');
     ulHeadElement.setAttribute('data-bs-theme', 'dark');
-    pageContent.appendChild(ulHeadElement);
+    div.appendChild(ulHeadElement);
 
-    let driver = await getDriver(CURRENT_SEASON, driverId);
-    let season = await seasonResult(CURRENT_SEASON);
-
-    console.log("driver", driver);
     let flag = getFlag(driver.nationality);
     let headContent = `
         <div class="me-auto">
@@ -104,7 +106,7 @@ async function driver(driverId){
     let ulElement = document.createElement('ul');
     ulElement.setAttribute('class', 'list-group');
     ulElement.setAttribute('data-bs-theme', 'dark');
-    pageContent.appendChild(ulElement);
+    div.appendChild(ulElement);
 
     season.forEach( round => {
         let driverStats = round.Results.filter(result => result.Driver.driverId == driverId)[0];
@@ -168,38 +170,37 @@ async function driver(driverId){
             ulElement.insertAdjacentHTML('beforeend', content);
         }
     })
-    hideSpinner();
+    return div;
 }
 
 //Tabla calendario
-async function tablaCalendar(data){
-    console.log("tablaCalendar:",data);
-    //borro tabla y muestro spinner
-    pageContent.innerHTML="";
-    showSpinner();
-
+async function calendarContent(data){
+    console.log("calendarContent():",data);
     //creo tabla ul
     let ulElement = document.createElement('ul');
     ulElement.setAttribute('class', 'list-group');
     ulElement.setAttribute('data-bs-theme', 'dark');
-    pageContent.appendChild(ulElement);
 
     data.forEach(round => {
         let flag = getFlag(round.Circuit.Location.country);
         content = 
-            `<li class="list-group-item list-group-item-action justify-content-between align-items-start pointer" onclick="roundResult(${round.round})">
+            `<li class="list-group-item list-group-item-action justify-content-between align-items-start pointer" onclick="roundDetailController(${round.round})">
                 <div class="ms-2 me-auto">
                     <div class="d-flex align-items-center">
                         <p class="my-auto">#${round.round}</p>
                         <img src="${flag}" class="nation ms-2">
                         <p class="fw-bold mx-2 my-auto fs-4 align-middle">${round.raceName}</p>
-                        <p class="fw-light my-auto align-middle">${round.Circuit.circuitName}</p>
+                        <p class="fw-light my-auto align-middle">${round.Circuit.circuitName}</p>`;
+                if((round.Sprint?.date ?? "") != ""){
+                        content += `<span class="badge text-bg-warning ms-auto">SPRINT</span>`;
+                }
+            content += `
                     </div>
                 </div>
                 <div class="d-flex">
-                    <!--<p>${round.Circuit.circuitName}</p>-->`;
+                    <p>Fecha: ${round.date}</p>`;
             //Proxima Fecha
-            if(round.round == parseInt(CURRENT_ROUND)+1){
+            if(round.round == parseInt(ROUND)+1){
                 content +=`
                             <span class="badge text-bg-success ms-auto">
                                 <p class="fs-6 my-1" >Proxima
@@ -214,33 +215,29 @@ async function tablaCalendar(data){
             </li>`;
         ulElement.insertAdjacentHTML('beforeend', content);   
     })
-    hideSpinner();
+    return ulElement;
 }
 
 //Tabla resultado de una ronda
-async function roundResult(roundId){
-    console.log("roundId:", roundId);
+async function roundDetailContent(season, roundId){
+    console.log("roundDetailContent():", roundId);
 
     //Recupero datos.
-    let season = await seasonResult(CURRENT_SEASON);
     let round = season.filter( race => parseInt(race.round) == roundId)[0];
 
     //No se corrio la carrera
     if(round == undefined){
-        console.log("roundResult: no encontre la carrera");
+        console.log("roundDetailContent(): no encontre la carrera");
         return false;
     }
-
-    console.log("roundId:",round);
-    //borro tabla y muestro spinner
-    pageContent.innerHTML="";
-    showSpinner();
+    //Creo div que contiente respuesta entera.
+    let div = document.createElement('div');
 
     //creo cabecera
     let ulHeadElement = document.createElement('ul');
     ulHeadElement.setAttribute('class', 'list-group mb-3');
     ulHeadElement.setAttribute('data-bs-theme', 'dark');
-    pageContent.appendChild(ulHeadElement);
+    div.appendChild(ulHeadElement);
     let flag = getFlag(round.Circuit.Location.country);
     let headContent = `
         <div class="me-auto">
@@ -264,7 +261,7 @@ async function roundResult(roundId){
     let ulElement = document.createElement('ul');
     ulElement.setAttribute('class', 'list-group');
     ulElement.setAttribute('data-bs-theme', 'dark');
-    pageContent.appendChild(ulElement);
+    div.appendChild(ulElement);
 
     content =`<li class="list-group-item">
                 <table class="table">
@@ -307,6 +304,6 @@ async function roundResult(roundId){
     })
     content +=`</tbody></table></li>`;
     ulElement.insertAdjacentHTML('beforeend', content);
-    hideSpinner()
+    return div;
 }
 

@@ -1,9 +1,10 @@
 /*https://github.com/jolpica/jolpica-f1/blob/main/docs/README.md
 */
 const BASE_URL = "https://api.jolpi.ca";
-let CURRENT_ROUND = "";
-let CURRENT_SEASON = "2024";
+let ROUND = "";
+let SEASON = "2024";
 let SEASON_CACHE = {};
+let CALENDAR_CACHE = {};
 const COUNTRY={
     "British" : "gb",
     "Austrian": "at",
@@ -47,6 +48,16 @@ const COUNTRY={
     "United States": "US",
     "Qatar": "QA",
     "UAE": "AE",
+    "Argentine" : "AR",
+    "Belgian": "BE",
+    "France": "FR",
+    "Germany": "DE",
+    "Switzerland": "CH",
+    "Russian": "RU",
+    "Brazilian": "BR",
+    "Polish": "PL",
+    "Indian": "IN",
+    "Swedish": "SE"
 };
 document.addEventListener("DOMContentLoaded",()=>{
 
@@ -93,8 +104,9 @@ let getJsonData = async function (url){
 }
 
 //Drive Standings
-async function driveStandings(year = new Date().getFullYear()){
-    const DRIVE_STANDINGS=`/ergast/f1/${year}/driverstandings/`;
+async function driveStandings(){
+    console.log("driveStandings()", SEASON);
+    const DRIVE_STANDINGS=`/ergast/f1/${SEASON}/driverstandings/`;
 
     let data = await getJsonData(BASE_URL+DRIVE_STANDINGS);
     if(data.status != "ok"){
@@ -102,13 +114,14 @@ async function driveStandings(year = new Date().getFullYear()){
         console.log("error")
     }
     let table = data.data.MRData.StandingsTable.StandingsLists[0];
-    CURRENT_ROUND=data.data.MRData.StandingsTable.round;
-    CURRENT_SEASON=data.data.MRData.StandingsTable.season;
+    ROUND=data.data.MRData.StandingsTable.round;
+    //SEASON=data.data.MRData.StandingsTable.season;
     return table;
 }
 //Constructor Standings
-async function constructorStandings(year = new Date().getFullYear()){
-    const CONSTRUCTOR_STANDINGS=`/ergast/f1/${year}/constructorstandings/`;
+async function constructorStandings(){
+    console.log("constructorStandings():", SEASON)
+    const CONSTRUCTOR_STANDINGS=`/ergast/f1/${SEASON}/constructorstandings/`;
 
     let data = await getJsonData(BASE_URL+CONSTRUCTOR_STANDINGS);
     if(data.status != "ok"){
@@ -151,9 +164,19 @@ async function seasonResult(season){
 
 //Calendario
 async function getCalendar(){
-    console.log("getCalendar:")
-    let json = await getJsonData(BASE_URL+`/ergast/f1/current/`);
-    return json.data.MRData.RaceTable.Races
+    console.log("getCalendar()", SEASON);
+    let result = ""; 
+    if(CALENDAR_CACHE[SEASON] == undefined){
+        let json = await getJsonData(BASE_URL+`/ergast/f1/${SEASON}/`);
+        result = json.data.MRData.RaceTable.Races
+        //guardo en memoria.
+        CALENDAR_CACHE[SEASON]=result;
+    }else{
+        console.log("getCalendar():", SEASON, " caché");
+        result = CALENDAR_CACHE[SEASON];
+    }
+
+    return result;
 }
 
 //info piloto
