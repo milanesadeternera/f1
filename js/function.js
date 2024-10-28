@@ -266,6 +266,9 @@ async function roundDetailContent(season, roundId, sprint){
     console.log("roundDetailContent(): Sprint", sprint);
     if(sprint != false){
         //hay sprint
+        //================================================
+        //si estas viendo esto, perdon. se puede optimizar
+        //================================================
         //tabElement
         //tableDiv
         //  ->divRace
@@ -365,5 +368,44 @@ async function roundDetailContent(season, roundId, sprint){
 //Esta funcion arma la tabla sprint.
 function tableSprint(sprint, ulElement){
     console.log("tableSprint()", sprint);
-    ulElement.innerHTML=`asdasdasoidaoisndoiansodnaw`;
+    let content =`<li class="list-group-item">
+    <table class="table">
+    <thead>
+        <tr>
+        <th scope="col">Pos.</th>
+        <th scope="col">Piloto</th>
+        <th scope="col">Equipo</th>
+        <th scope="col">Tiempo</th>
+        <th scope="col" class="text-end">Puntos</th>
+        </tr>
+    </thead>
+    <tbody>`;
+    sprint.forEach( result => {
+        //Lista Resultados
+        content +=`
+                    <tr>
+                        <th scope="row">${result.position}</th>
+                        <td>${result.Driver.familyName}</td>
+                        <td>${result.Constructor.name}</td>`;
+
+                        //DNF
+                        if(/^[a-zA-Z]$/.test(result.positionText)){
+                            content += `<td><span class="badge text-bg-danger rounded-pill">DNF</span></td>`;
+                        }else{
+                            content += `<td>${result.Time?.time ?? result.status}</td>`
+                        }
+                        //Fast Lap
+                        if((result.FastestLap?.rank ?? "0") == "1"){
+                            content +=`<td class="text-end">
+                                    <span class="badge fastlap rounded-pill me-2">Fast Lap</span>
+                                    ${result.points}
+                                    </td>`;
+                        }else{
+                            content +=`<td class="text-end">${result.points}</td>`;
+                        }
+                        
+                    content +=`</tr>`;
+    })
+    content +=`</tbody></table></li>`;
+    ulElement.insertAdjacentHTML('beforeend', content);
 }
