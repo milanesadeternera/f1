@@ -219,7 +219,7 @@ async function calendarContent(data){
 }
 
 //Tabla resultado de una ronda
-async function roundDetailContent(season, roundId){
+async function roundDetailContent(season, roundId, sprint){
     console.log("roundDetailContent():", roundId);
 
     //Recupero datos.
@@ -261,7 +261,62 @@ async function roundDetailContent(season, roundId){
     let ulElement = document.createElement('ul');
     ulElement.setAttribute('class', 'list-group');
     ulElement.setAttribute('data-bs-theme', 'dark');
-    div.appendChild(ulElement);
+
+    //tiene sprint?
+    console.log("roundDetailContent(): Sprint", sprint);
+    if(sprint != false){
+        //hay sprint
+        //tabElement
+        //tableDiv
+        //  ->divRace
+        //      -> ulElement
+        //  ->divSprint
+        //      -> ul ELementSptint
+        //Creo cabecera
+        let tabElement = document.createElement('ul');
+        tabElement.setAttribute('class', 'nav nav-tabs');
+        tabElement.setAttribute('data-bs-theme', 'dark');
+        tabElement.innerHTML = `
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="race-tab" data-bs-toggle="tab" data-bs-target="#race-tab-pane" type="button" role="tab" aria-controls="race-tab-pane" aria-selected="true">Race</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sprint-tab" data-bs-toggle="tab" data-bs-target="#sprint-tab-pane" type="button" role="tab" aria-controls="sprint-tab-pane" aria-selected="false">Sprint</button>
+            </li>
+        `;
+        div.appendChild(tabElement);
+
+        //creo cuerpo de contenido
+        let tableDiv = document.createElement('div');
+        tableDiv.setAttribute("class", "tab-content");
+        div.appendChild(tableDiv);
+
+        //Race
+        let divRace = document.createElement('div');
+        divRace.setAttribute("class", "tab-pane fade show active");
+        divRace.setAttribute("id", "race-tab-pane")
+        tableDiv.appendChild(divRace);
+        divRace.appendChild(ulElement);
+
+        //Sprint
+        let divSprint = document.createElement('div');
+        divSprint.setAttribute("class", "tab-pane fade");
+        divSprint.setAttribute("id", "sprint-tab-pane");
+        tableDiv.appendChild(divSprint);
+
+
+        //creo tabla ul Sprint
+        let ulElementSprint = document.createElement('ul');
+        ulElementSprint.setAttribute('class', 'list-group');
+        ulElementSprint.setAttribute('data-bs-theme', 'dark');
+        divSprint.appendChild(ulElementSprint);
+
+        ulElementSprint.insertAdjacentHTML('beforeend', tableSprint(sprint, ulElementSprint));
+
+    }else{
+        //no hay sprint
+        div.appendChild(ulElement);
+    }
 
     content =`<li class="list-group-item">
                 <table class="table">
@@ -307,3 +362,8 @@ async function roundDetailContent(season, roundId){
     return div;
 }
 
+//Esta funcion arma la tabla sprint.
+function tableSprint(sprint, ulElement){
+    console.log("tableSprint()", sprint);
+    ulElement.innerHTML=`asdasdasoidaoisndoiansodnaw`;
+}

@@ -185,3 +185,17 @@ async function getDriver(season, driverId){
     let json = await getJsonData(BASE_URL+`/ergast/f1/${season}/drivers/${driverId}/`);
     return json.data.MRData.DriverTable.Drivers[0];
 }
+
+//Obtener sprint
+async function getSprint(roundId){
+    console.log("getSprint():",SEASON,roundId);
+    let calendar = await getCalendar();
+    let round = calendar.filter(round => round.round == roundId)[0];
+    if(round.Sprint !== undefined){
+        //hay sprint
+        let json = await getJsonData(BASE_URL+`/ergast/f1/${SEASON}/${roundId}/sprint/`);
+        return json.data.MRData.RaceTable.Races[0].SprintResults;
+    }else{
+        return false;
+    }
+}

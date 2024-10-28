@@ -122,9 +122,13 @@ async function roundDetailController(roundId){
     pageContent.innerHTML = "";
 
     let season = await seasonResult(SEASON);
-    let content = await roundDetailContent(season, roundId);
+
+    //tengo sprint?
+    let sprint = await getSprint(roundId);
+
+    let content = await roundDetailContent(season, roundId, sprint);
 
     hideSpinner();
-    pageContent.appendChild(content);
+    pageContent.appendChild(content,sprint);
 }
 
