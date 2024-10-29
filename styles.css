@@ -21,3 +21,21 @@ body{
 .pointer{
     cursor: pointer;
 }
+
+
+/*Small devices (landscape phones, 576px and up)*/
+@media (max-width: 767px) {
+    body{
+        background-color:blue;
+    }
+    #title > p{
+        font-size: var(--bs-nav-link-font-size) !important;
+    }
+}
+
+/* Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) and (max-width: 991px) { 
+    body{
+        background-color: aqua;
+    }
+}

@@ -7,19 +7,19 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <link href="styles.css" rel="stylesheet" >
-    <title>Document</title>
+    <title>F1 Resultados y Posiciones</title>
 </head>
 <body>
 
     <main>
-        <div class="container col col-lg-8 col-md-8">
+        <div class="container col col-lg-6 col-md-8">
             <div class="row mt-4 justify-content-center">
                 <div class="col">
                     <ul class="list-group" data-bs-theme="dark">
                         <li class="list-group-item">
-                            <div class="d-flex">
+                            <div id="title" class="d-flex align-items-center">
                                 <img src="data/f1.svg" class="f1logo me-4">
-                                <p class="fs-3">Posiciones y estadisticas de la F1</p>
+                                <p class="fs-1 fs-sm-5">Resultados y Posiciones de la F1</p>
                             </div>
                         </li>
                     </ul>
@@ -43,10 +43,11 @@
                 </div>
             </div>
             <!-- spinner -->
-            <div id="spinner" class="text-center mt-3">
+            <div id="spinner" class="text-center my-5">
                 <div class="spinner-border" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
+                <p>cargando</p>
             </div>
             <!-- Cuerpo -->
             <div class="row mt-2 mb-8 justify-content-center">

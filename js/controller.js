@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
     //Creo el history dropdown
     makeDropdown();
     //Tabla de cuerpo.
+    
     pageContent = document.getElementById("mainTable");
     //cargo por defecto la tabla de pilotos
     driverStandingsController();
@@ -117,18 +118,18 @@ async function calendarController(year = SEASON){
 //Carrera
 async function roundDetailController(roundId){
     console.log("roundDetailController():", roundId);
-    showSpinner();
-    //Porque tengo que limpiar esto no se (?)
-    pageContent.innerHTML = "";
-
-    let season = await seasonResult(SEASON);
-
-    //tengo sprint?
-    let sprint = await getSprint(roundId);
-
-    let content = await roundDetailContent(season, roundId, sprint);
-
-    hideSpinner();
-    pageContent.appendChild(content,sprint);
+    if(roundId <= ROUND){
+        showSpinner();
+        //Porque tengo que limpiar esto no se (?)
+        pageContent.innerHTML = "";
+        let season = await seasonResult(SEASON);
+        //tengo sprint?
+        let sprint = await getSprint(roundId);
+    
+        let content = await roundDetailContent(season, roundId, sprint);
+    
+        hideSpinner();
+        pageContent.appendChild(content,sprint);
+    }
 }
 

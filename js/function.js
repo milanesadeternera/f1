@@ -27,7 +27,7 @@ function driverStandingsContent(data){
                 ${driver.Driver.permanentNumber ?? ""}
                 <img src="${flag}" class="nation">
             </div>
-            <div class="d-flex flex-column col-2">
+            <div class="d-flex flex-column col-md-2 col-sm-4">
             <span class="badge text-bg-primary rounded-pill mb-1">Puntos: ${driver.points}</span>`;
             if(driver.wins > 0){
                 content += `<span class="badge text-bg-success rounded-pill">Victorias: ${driver.wins}</span>`;
@@ -57,7 +57,7 @@ function constructorStandingsContent(data){
                 <div class="fw-bold">${team.Constructor.name}</div>
                 ${team.Constructor.nationality}
                 </div>
-                <div class="d-flex flex-column col-2">
+                <div class="d-flex flex-column col-md-2 col-sm-4">
                 <span class="badge text-bg-primary rounded-pill mb-1">Puntos: ${team.points}</span>
                 <span class="badge text-bg-success rounded-pill">Victorias: ${team.wins}</span>
                 </div>
@@ -128,7 +128,7 @@ async function driverDetailContent(season, driver){
                         <p class="mb-0 fs-5 text-decoration-underline">Largada</p>
                         <p class="mb-0 fs-4">${driverStats.grid}</p>`;
                         if(driverStats.grid == 1){
-                            content += `<span class="badge text-bg-warning rounded-pill">Pole</span>`;
+                            content += `<span class="badge text-bg-success rounded-pill">Pole</span>`;
                         }
 
                     content +=`
@@ -137,9 +137,15 @@ async function driverDetailContent(season, driver){
                         <p class="mb-0 fs-5 text-decoration-underline">Llegada</p>`;
                         //DNF
                         if(driverStats.positionText != "R"){
+                            if(driverStats.position == 1 ){
+                                content +=`<span class="badge text-bg-warning rounded-pill">win 
+                                            <p class="mb-0 fs-4">${driverStats.position}</p></span>
+                                            <p class="mb-0 fs-6">${driverStats.Time?.time ?? driverStats.status}</p>`;
+                            }else{
                             content +=`
                             <p class="mb-0 fs-4">${driverStats.position}</p>
                             <p class="mb-0 fs-6">${driverStats.Time?.time ?? driverStats.status}</p>`;
+                            }
                         }else{
                             content +=`
                             <span class="badge text-bg-danger rounded-pill">DNF</span>`;
@@ -162,7 +168,7 @@ async function driverDetailContent(season, driver){
                     </div>
                     <div class="text-end w-25">
                         <p class="mb-0 fs-5 text-decoration-underline">Puntos</p>
-                        <p class="mb-0 fs-4">${driverStats.points}</p>
+                        <p class="mb-0 fs-4">+${driverStats.points}</p>
                         <p></p>
                     </div>
                 </div>
@@ -186,10 +192,12 @@ async function calendarContent(data){
         content = 
             `<li class="list-group-item list-group-item-action justify-content-between align-items-start pointer" onclick="roundDetailController(${round.round})">
                 <div class="ms-2 me-auto">
-                    <div class="d-flex align-items-center">
-                        <p class="my-auto">#${round.round}</p>
-                        <img src="${flag}" class="nation ms-2">
-                        <p class="fw-bold mx-2 my-auto fs-4 align-middle">${round.raceName}</p>
+                    <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center">
+                        <div class="d-flex">
+                            <p class="my-auto">#${round.round}</p>
+                            <img src="${flag}" class="nation ms-2">
+                            <p class="fw-bold mx-2 my-auto fs-4 align-middle">${round.raceName}</p>
+                        </div>
                         <p class="fw-light my-auto align-middle">${round.Circuit.circuitName}</p>`;
                 if((round.Sprint?.date ?? "") != ""){
                         content += `<span class="badge text-bg-warning ms-auto">SPRINT</span>`;
@@ -197,7 +205,7 @@ async function calendarContent(data){
             content += `
                     </div>
                 </div>
-                <div class="d-flex">
+                <div class="d-flex ms-2">
                     <p>Fecha: ${round.date}</p>`;
             //Proxima Fecha
             if(round.round == parseInt(ROUND)+1){
@@ -314,7 +322,7 @@ async function roundDetailContent(season, roundId, sprint){
         ulElementSprint.setAttribute('data-bs-theme', 'dark');
         divSprint.appendChild(ulElementSprint);
 
-        ulElementSprint.insertAdjacentHTML('beforeend', tableSprint(sprint, ulElementSprint));
+        tableSprint(sprint, ulElementSprint);
 
     }else{
         //no hay sprint
@@ -352,10 +360,10 @@ async function roundDetailContent(season, roundId, sprint){
                         if((result.FastestLap?.rank ?? "0") == "1"){
                             content +=`<td class="text-end">
                                     <span class="badge fastlap rounded-pill me-2">Fast Lap</span>
-                                    ${result.points}
+                                    +${result.points}
                                     </td>`;
                         }else{
-                            content +=`<td class="text-end">${result.points}</td>`;
+                            content +=`<td class="text-end">+${result.points}</td>`;
                         }
                         
                     content +=`</tr>`;
@@ -398,10 +406,10 @@ function tableSprint(sprint, ulElement){
                         if((result.FastestLap?.rank ?? "0") == "1"){
                             content +=`<td class="text-end">
                                     <span class="badge fastlap rounded-pill me-2">Fast Lap</span>
-                                    ${result.points}
+                                    +${result.points}
                                     </td>`;
                         }else{
-                            content +=`<td class="text-end">${result.points}</td>`;
+                            content +=`<td class="text-end">+${result.points}</td>`;
                         }
                         
                     content +=`</tr>`;

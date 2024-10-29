@@ -57,7 +57,13 @@ const COUNTRY={
     "Brazilian": "BR",
     "Polish": "PL",
     "Indian": "IN",
-    "Swedish": "SE"
+    "Swedish": "SE",
+    "Colombian": "CO",
+    "Portuguese": "PT",
+    "Turkey": "TR",
+    "Malaysia": "MY",
+    "Argentina": "AR",
+    "Portugal": "PT",
 };
 document.addEventListener("DOMContentLoaded",()=>{
 
