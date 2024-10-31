@@ -51,6 +51,7 @@ const COUNTRY = {
     "Spanish": "ES",
     "Spain": "ES",
     "South African": "ZA",
+    "South Africa": "ZA",
     "Swedish": "SE",
     "Switzerland": "CH",
     "Swiss": "CH",

@@ -10,6 +10,9 @@ body{
     width: 30%;
     height: 30%;
 }
+.title{
+    font-family:"Saira";
+}
 .nation{
     width: 30px;
     height: 30px;
